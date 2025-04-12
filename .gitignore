@@ -1,32 +1,26 @@
-# Prerequisites
-*.d
+# Maven target
+target/
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+# Angular dist
+frontend/dist/
 
-# Precompiled Headers
-*.gch
-*.pch
+# Angular node_modules
+frontend/node_modules/
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+# IntelliJ IDEA
+*.iml
+.idea/
 
-# Fortran module files
-*.mod
-*.smod
+# Eclipse
+.project
+.classpath
+.settings/
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+# VS Code
+.vscode/
 
-# Executables
-*.exe
-*.out
-*.app
+# macOS files
+.DS_Store
+
+# Log files
+*.log
