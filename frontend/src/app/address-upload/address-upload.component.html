@@ -1,0 +1,45 @@
+<div class="container">
+  <h2>Naloži Excel datoteko z naslovi</h2>
+
+  <input type="file" (change)="onFileSelected($event)" />
+  <button [disabled]="!selectedFile || uploadInProgress" (click)="onUpload()">
+    {{ uploadInProgress ? 'Nalagam...' : 'Naloži' }}
+  </button>
+
+  <div *ngIf="uploadSuccess" class="success-msg">
+    ✅ Datoteka uspešno naložena!
+  </div>
+
+  <div *ngIf="uploadError" class="error-msg">
+    ⚠️ {{ uploadError }}
+  </div>
+
+  <div *ngIf="addresses.length > 0" class="table-wrapper">
+    <h3>Najdeni naslovi:</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Ulica</th>
+          <th>Hišna št.</th>
+          <th>Dodatek</th>
+          <th>Občina</th>
+          <th>Tehnologija</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let a of addresses"
+            [ngClass]="{
+              'highlight-red': a.tehnologija && a.tehnologija.toLowerCase().includes('potrebna izgradnja'),
+              'highlight-green': a.tehnologija.toLowerCase() === 'wla vula',
+              'highlight-gray': !a.tehnologija
+            }">
+          <td>{{ a.ulica }}</td>
+          <td>{{ a.hisnaStevilka }}</td>
+          <td>{{ a.dodatek }}</td>
+          <td>{{ a.obcina }}</td>
+          <td>{{ a.tehnologija }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

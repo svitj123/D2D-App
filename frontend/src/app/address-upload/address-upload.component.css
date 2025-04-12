@@ -1,0 +1,57 @@
+.container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+  }
+  
+  button {
+    margin-left: 10px;
+    padding: 6px 14px;
+    cursor: pointer;
+  }
+  
+  .success-msg {
+    color: green;
+    margin-top: 10px;
+  }
+  
+  .error-msg {
+    color: red;
+    margin-top: 10px;
+  }
+  
+  .table-wrapper {
+    margin-top: 20px;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+  }
+  
+  table th, table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  thead {
+    background-color: #eee;
+  }
+  
+  .highlight-red {
+    background-color: #ffe5e5;
+  }
+  
+  .highlight-green {
+    background-color: #e5ffe5;
+  }
+  
+  .highlight-gray {
+    background-color: #f4f4f4;
+  }
