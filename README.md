@@ -10,14 +10,6 @@ Aplikacija za interaktivno prikazovanje naslovov za teren (Door-to-door) na zeml
 
 ---
 
-## 📦 Struktura projekta
-
-D2D-App
-├── backend       # Spring Boot REST API
-└── frontend      # Angular frontend aplikacija
-
----
-
 ## ⚙️ Navodila za zagon projekta lokalno
 
 ### Backend (Spring Boot):
