@@ -1,16 +1,13 @@
 package com.d2dapp.backend.service;
 
-import com.d2dapp.backend.entity.GeocodedAddress;
-import com.d2dapp.backend.repository.GeocodedAddressRepository;
-import com.d2dapp.backend.service.GeoService;
+import com.d2dapp.backend.dto.GeocodedAddress;
+import com.d2dapp.backend.dto.GeocodingResult;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class ExcelGeocodingService {
@@ -21,17 +18,15 @@ public class ExcelGeocodingService {
         this.geoService = geoService;
     }
 
-    public List<GeocodedAddress> processExcelFile(MultipartFile file) {
-        List<GeocodedAddress> result = new ArrayList<>();
+    public GeocodingResult processExcelFile(MultipartFile file) {
+        List<GeocodedAddress> successful = new ArrayList<>();
+        List<String> failed = new ArrayList<>();
 
         try (InputStream is = file.getInputStream()) {
             Workbook workbook = WorkbookFactory.create(is);
             Sheet sheet = workbook.getSheetAt(0);
             Iterator<Row> rows = sheet.iterator();
             if (rows.hasNext()) rows.next(); // skip header
-
-            List<String> addressStrings = new ArrayList<>();
-            List<String> techList = new ArrayList<>();
 
             while (rows.hasNext()) {
                 Row row = rows.next();
@@ -42,30 +37,22 @@ public class ExcelGeocodingService {
                 String obcina = getCellValue(row.getCell(3));
                 String tehnologija = getCellValue(row.getCell(4));
 
-                String address = String.format("%s %s%s, %s",
-                        ulica,
-                        hs,
-                        dodatek != null && !dodatek.isEmpty() ? dodatek : "",
-                        obcina);
+                String naslov = ulica + " " + hs + (dodatek != null && !dodatek.isBlank() ? dodatek : "") + ", " + obcina;
 
-                addressStrings.add(address);
-                techList.add(tehnologija);
-            }
-
-            List<GeocodedAddress> geoResults = geoService.getCoordinatesForAddresses(addressStrings);
-
-            // dodamo tehnologijo ročno
-            for (int i = 0; i < geoResults.size(); i++) {
-                GeocodedAddress g = geoResults.get(i);
-                g.setTehnologija(techList.get(i));
-                result.add(g);
+                try {
+                    GeocodedAddress g = geoService.getCoordinates(naslov);
+                    g.setTehnologija(tehnologija);
+                    successful.add(g);
+                } catch (Exception e) {
+                    failed.add(naslov);
+                }
             }
 
         } catch (Exception e) {
             throw new RuntimeException("Napaka pri obdelavi Excel datoteke: " + e.getMessage(), e);
         }
 
-        return result;
+        return new GeocodingResult(successful, failed);
     }
 
     private String getCellValue(Cell cell) {

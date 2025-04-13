@@ -1,33 +1,24 @@
-package com.d2dapp.backend.entity;
+package com.d2dapp.backend.dto;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
-@Document(collection = "geocoded_addresses")
 public class GeocodedAddress {
-
-    @Id
-    private String id;
-
     private String fullAddress;
     private double lat;
     private double lng;
     private String tehnologija;
+    private String status;
 
+    // Konstruktorji
     public GeocodedAddress() {}
 
-    public GeocodedAddress(String fullAddress, double lat, double lng) {
+    public GeocodedAddress(String fullAddress, double lat, double lng, String tehnologija, String status) {
         this.fullAddress = fullAddress;
         this.lat = lat;
         this.lng = lng;
+        this.tehnologija = tehnologija;
+        this.status = status;
     }
 
-    // Getters and setters
-
-    public String getId() {
-        return id;
-    }
-
+    // Getterji in setterji
     public String getFullAddress() {
         return fullAddress;
     }
@@ -58,5 +49,13 @@ public class GeocodedAddress {
 
     public void setTehnologija(String tehnologija) {
         this.tehnologija = tehnologija;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

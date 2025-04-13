@@ -1,7 +1,10 @@
 package com.d2dapp.backend.service;
 
-import com.d2dapp.backend.entity.GeocodedAddress;
+import com.d2dapp.backend.dto.GeocodedAddress;
 import com.d2dapp.backend.repository.GeocodedAddressRepository;
+
+import ch.qos.logback.core.net.SyslogOutputStream;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -27,7 +30,11 @@ public class GeoService {
 
     public GeocodedAddress getCoordinates(String fullAddress) {
         Optional<GeocodedAddress> cached = repository.findByFullAddress(fullAddress);
-        if (cached.isPresent()) return cached.get();
+        if (cached.isPresent()) {
+            GeocodedAddress addr = cached.get();
+            addr.setStatus("cached");
+            return addr;
+        }
 
         return geocodeAndSave(fullAddress).orElseThrow(() ->
             new RuntimeException("Naslova ni bilo mogoče geokodirati: " + fullAddress)
@@ -50,7 +57,7 @@ public class GeoService {
             double lat = location.get("lat").asDouble();
             double lng = location.get("lng").asDouble();
 
-            GeocodedAddress result = new GeocodedAddress(fullAddress, lat, lng);
+            GeocodedAddress result = new GeocodedAddress(fullAddress, lat, lng, null, "geocoded");
             repository.save(result);
             return Optional.of(result);
 
@@ -64,14 +71,10 @@ public class GeoService {
         List<GeocodedAddress> results = new ArrayList<>();
 
         for (String address : addresses) {
-            Optional<GeocodedAddress> cached = repository.findByFullAddress(address);
-            if (cached.isPresent()) {
-                results.add(cached.get());
-            } else {
-                Optional<GeocodedAddress> geocoded = geocodeAndSave(address);
-                geocoded.ifPresent(results::add);
-            }
+            GeocodedAddress resolved = getCoordinates(address);
+            results.add(resolved);
         }
+
         return results;
     }
 }
