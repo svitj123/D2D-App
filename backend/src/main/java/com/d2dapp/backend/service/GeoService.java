@@ -2,8 +2,7 @@ package com.d2dapp.backend.service;
 
 import com.d2dapp.backend.dto.GeocodedAddress;
 import com.d2dapp.backend.repository.GeocodedAddressRepository;
-
-import ch.qos.logback.core.net.SyslogOutputStream;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -43,23 +42,35 @@ public class GeoService {
 
     public Optional<GeocodedAddress> geocodeAndSave(String fullAddress) {
         try {
+            // Dodaj Slovenija na konec (če še ni)
+            if (!fullAddress.toLowerCase().contains("slovenija")) {
+                fullAddress += ", Slovenija";
+            }
+
             String encoded = URLEncoder.encode(fullAddress, StandardCharsets.UTF_8);
             String url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + encoded + "&key=" + apiKey;
 
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
-            var json = new com.fasterxml.jackson.databind.ObjectMapper().readTree(response.getBody());
-            var location = json.at("/results/0/geometry/location");
+            var json = new ObjectMapper().readTree(response.getBody());
 
-            if (location.isMissingNode()) return Optional.empty();
+            if (json.at("/results").isEmpty()) return Optional.empty();
+
+            var result = json.at("/results/0");
+            var location = result.at("/geometry/location");
+            var locationType = result.at("/geometry/location_type").asText();
+            var partialMatch = result.has("partial_match") && result.get("partial_match").asBoolean();
+
+            // Sprejmemo le natančne lokacije
+            if (!"ROOFTOP".equals(locationType) || partialMatch) return Optional.empty();
 
             double lat = location.get("lat").asDouble();
             double lng = location.get("lng").asDouble();
 
-            GeocodedAddress result = new GeocodedAddress(fullAddress, lat, lng, null, "geocoded");
-            repository.save(result);
-            return Optional.of(result);
+            GeocodedAddress resultObj = new GeocodedAddress(fullAddress, lat, lng, null, "geocoded");
+            repository.save(resultObj);
+            return Optional.of(resultObj);
 
         } catch (Exception e) {
             System.err.println("Napaka pri geokodiranju: " + e.getMessage());
